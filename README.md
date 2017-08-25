@@ -1,5 +1,6 @@
 # itemcatalog
 Item Catalog project for Udacity Full Stack Nanodegree
+
 Author: Megan Elmore
 
 ## Requirements
@@ -61,3 +62,9 @@ Optional parameters: new_name, new_description, new_category
 DELETE http://localhost:5000/api/delete_item?category=Hiking&name=daypack
 
 Required parameters: category, name
+
+## Resources
+
+I based much of the code structure, especially the OAuth functionality, on my solutions and the instructor code provided with the Udacity classes Full Stack Fundamentals, Authentication and Authorization: OAuth, and Designing RESTful APIs.
+
+I styled my app using Bootstrap and drew examples from their [public documentation](https://getbootstrap.com/docs/4.0/getting-started/introduction/).
