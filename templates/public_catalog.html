@@ -1,0 +1,17 @@
+{% extends "main.html" %}
+{% block content %}
+
+<main>
+  <h1>Recent items</h1>
+  <ul>
+    {% for item in topten %}
+      <li>
+        <a href="{{ url_for('showItem', category_name=item.category.name, item_name=item.name) }}">{{ item.name }}</a>
+        in
+        <a href="{{ url_for('showFullCategory', category_name=item.category.name) }}">{{ item.category.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</main>
+
+{% endblock %}

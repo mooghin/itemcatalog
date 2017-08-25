@@ -1,0 +1,12 @@
+.container-fluid {
+  background-color: #bdd9Bf;
+  height: 100%;
+}
+
+main a:link, main a:visited {
+  color: #243e36;
+}
+
+.btn a:link, .btn a:visited {
+  color: #fff;
+}

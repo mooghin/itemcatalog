@@ -1,0 +1,20 @@
+{% extends "main.html" %}
+{% block content %}
+
+<main>
+  <h1>{{ category.name }} items</h1>
+  <p>
+    <a href="{{ url_for('newItemInCategory', category_name=category.name) }}">Add a new item</a>
+  </p>
+  <ul>
+    {% for item in items %}
+      <li>
+        <a href="{{ url_for('showItem', category_name=category.name, item_name=item.name) }}">
+          {{ item.name }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</main>
+
+{% endblock %}

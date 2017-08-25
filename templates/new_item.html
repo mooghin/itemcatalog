@@ -1,0 +1,44 @@
+{% extends "main.html" %}
+{% block content %}
+
+<main>
+  <h1>Add new item</h1>
+  <form action='#' method='post'>
+    <div class="form-group">
+      <label for='nameInput'>Name:</label>
+      <input type='text' size='30' class='form-control'
+      name='name' id='nameInput' placeholder='item name'>
+    </div>
+
+    <div class="form-group">
+      <label for='descriptionInput'>Description:</label>
+      <textarea class='form-control' name='description' rows="3"
+      id='descriptionInput' placeholder='short description'></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for='categorySelect'>Category</label>
+      <select name='category' class='form-control' id='categorySelect'>
+        {% for cat in categories %}
+          <option value="{{ cat.name }}"
+          {% if category is defined %}
+            {% if cat.name == category.name %}selected{% endif %}
+          {% endif %}>
+            {{ cat.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button type='submit' class="btn btn-primary">Submit</button>
+
+  </form>
+
+  {% if category is defined %}
+    <a class="btn btn-danger" href="{{ url_for('showFullCategory', category_name=category.name) }}">Cancel</a>
+  {% else %}
+    <a class="btn btn-danger" href="{{ url_for('showRecentItems') }}">Cancel</a>
+  {% endif %}
+</main>
+
+{% endblock %}

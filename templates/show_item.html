@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+{% block content %}
+
+<main>
+  <h1>{{ item.name }}</h1>
+  <p>
+    {{ item.description }}
+  </p>
+  <a href="{{ url_for('showFullCategory', category_name=category.name) }}">
+    Back to all {{ category.name }} items
+  </a>
+</main>
+
+{% endblock %}
