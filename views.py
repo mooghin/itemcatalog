@@ -349,8 +349,8 @@ def showRecentItems():
 
 
 # Category page - show all items in this category
-@app.route('/catalog/<category_name>')
-@app.route('/catalog/<category_name>/items')
+@app.route('/catalog/<path:category_name>')
+@app.route('/catalog/<path:category_name>/items')
 def showFullCategory(category_name):
     all_categories = session.query(Category).all()
     this_category = session.query(Category).filter_by(name=category_name).one()
@@ -370,7 +370,7 @@ def showFullCategory(category_name):
 
 
 # Item page - show the item's name and description
-@app.route('/catalog/<category_name>/<item_name>')
+@app.route('/catalog/<path:category_name>/<path:item_name>')
 def showItem(category_name, item_name):
     all_categories = session.query(Category).all()
     this_category = session.query(Category).filter_by(name=category_name).one()
@@ -392,7 +392,7 @@ def showItem(category_name, item_name):
 
 
 # Item page - show the item's name and description
-@app.route('/catalog/<category_name>/new', methods=['GET', 'POST'])
+@app.route('/catalog/<path:category_name>/new', methods=['GET', 'POST'])
 def newItemInCategory(category_name):
     # Can't access this page unless we're logged in
     if 'username' not in login_session:
@@ -453,7 +453,7 @@ def newItem():
 
 
 # Edit item page - show a form where the user can edit any details of the item
-@app.route('/catalog/<category_name>/<item_name>/edit',
+@app.route('/catalog/<path:category_name>/<path:item_name>/edit',
            methods=['GET', 'POST'])
 def editItem(category_name, item_name):
 
@@ -506,7 +506,7 @@ def editItem(category_name, item_name):
 
 
 # Delete item page - allow the user to delete this item
-@app.route('/catalog/<category_name>/<item_name>/delete',
+@app.route('/catalog/<path:category_name>/<path:item_name>/delete',
            methods=['GET', 'POST'])
 def deleteItem(category_name, item_name):
     # Can't access this page unless we're logged in
@@ -560,7 +560,7 @@ def fullCatalogJSON():
 
 
 # Get one category of the catalog from an API call
-@app.route('/catalog/<category_name>.json')
+@app.route('/catalog/<path:category_name>.json')
 def categoryJSON(category_name):
     category = session.query(Category).filter_by(name=category_name).first()
     if category is not None:
@@ -574,7 +574,7 @@ def categoryJSON(category_name):
 
 
 # Get one item of the catalog from an API call
-@app.route('/catalog/<category_name>/<item_name>.json')
+@app.route('/catalog/<path:category_name>/<path:item_name>.json')
 def itemJSON(category_name, item_name):
     category = session.query(Category).filter_by(name=category_name).first()
     if category is None:
