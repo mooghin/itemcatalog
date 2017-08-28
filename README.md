@@ -20,22 +20,28 @@ All files in my itemcatalog repository should be copied into /vagrant/catalog.
 7. Run the project: `flask run`.
 8. Visit http://localhost:5000 or http://localhost:5000/catalog in your browser to see the front page of ItemCatalog.
 
-## Authorization
+## Authentication
 
-This project uses OAuth with Google Accounts to authenticate users and allow them to create, edit, and delete items.
+This project uses OAuth with Google Accounts to authenticate users.
 
 There is a log in button at the top right of the navigation bar that will start the authentication flow. Follow the instructions on screen, and when you are authenticated you will be redirected to the main page.
 
-When you are not logged in, you can only view the catalog. 
+When you are not logged in, you can only view the catalog.
 
-When you are logged in, you can add new items from any page; add new items to a category; and edit/delete any item from its page. You can log out by clicking the button at the top right of the navigation bar.
+When you are logged in, you can add new items from any page; add new items to a category. You can log out by clicking the button at the top right of the navigation bar.
+
+## Authorization for editing and deleting items
+
+Authenticated users can also edit and delete items, but only those items which they created. They will not be shown the option to edit or delete an item they do not own, and edit/delete operations will only proceed once authorization is verified.
 
 ## API endpoints
 http://localhost:5000/catalog.json returns the whole catalog in JSON format.
 http://localhost:5000/catalog/Hiking.json returns only the items in the Hiking category in JSON format.
 http://localhost:5000/catalog/Hiking/daypack.json returns only the daypack item from the Hiking category in JSON format.
 
-API users can also create, edit, and delete items if they have an access token.
+API users can also create if they have an access token.
+API users can edit and delete item if their access token identifies them
+as the owner of the object.
 
 Go to http://localhost:5000/api/request_token to get a token.
 

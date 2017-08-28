@@ -68,6 +68,8 @@ class Item(Base):
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship(Category)
     date_added = Column(DateTime, default=datetime.datetime.now)
+    owner_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    owner = relationship(User)
 
     @property
     def serialize(self):
@@ -79,6 +81,7 @@ class Item(Base):
             'description': self.description,
             'category': self.category.name,
             'date_added': self.date_added,
+            'owner_id': self.owner.id
         }
 
 # Set up database

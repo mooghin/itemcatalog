@@ -148,6 +148,30 @@ def makeAPIToken():
     return token.decode('ascii')
 
 
+# Gets the User object associated with the user who is requesting edit/delete
+# access, either
+def getUser(token_or_email):
+    # First, check if the parameter is a valid token, i.e.,  the user is
+    # requesting access through the API endpoints.
+    user_id = User.verify_auth_token(token_or_email)
+    if user_id is not None:
+        user = session.query(User).filter_by(id=user_id).first()
+        print("User is: " + user.username)
+        return user
+
+    # If it wasn't an access token, check for a user by this email address.
+    # This happens when an edit/delete request is made from the itemcatalog
+    # webpage.
+    else:
+        user = session.query(User).filter_by(email=token_or_email).first()
+        if user is not None:
+            return user
+
+        else:
+            print("User not found.")
+            return None
+
+
 # Login page - start the OAuth authorization process
 # This creates a state token when the user wants to start login,
 # which will be verified during the gconnect callback later
@@ -360,10 +384,11 @@ def showItem(category_name, item_name):
 
     # Show the template with edit/delete capability if we are logged in.
     else:
+        user = getUser(login_session['email'])
         return render_template('show_item_protected.html',
                                categories=all_categories,
                                category=this_category, item=item,
-                               username=login_session['username'])
+                               username=login_session['username'], user=user)
 
 
 # Item page - show the item's name and description
@@ -383,6 +408,7 @@ def newItemInCategory(category_name):
                                username=login_session['username'])
 
     elif request.method == 'POST':
+        current_user = getUser(login_session['email'])
         item_name = request.form['name']
         description = request.form['description']
         if not description:
@@ -391,7 +417,7 @@ def newItemInCategory(category_name):
         category = session.query(Category).\
             filter_by(name=new_category_name).one()
         new_item = Item(name=item_name, description=description,
-                        category=category)
+                        category=category, owner=current_user)
         session.add(new_item)
         session.commit()
         return redirect(url_for('showFullCategory',
@@ -410,6 +436,7 @@ def newItem():
                                username=login_session['username'])
 
     elif request.method == 'POST':
+        current_user = getUser(login_session['email'])
         item_name = request.form['name']
         # TODO: Figure out how to make this field required
         description = request.form['description']
@@ -419,7 +446,7 @@ def newItem():
         category = session.query(Category).\
             filter_by(name=new_category_name).one()
         new_item = Item(name=item_name, description=description,
-                        category=category)
+                        category=category, owner=current_user)
         session.add(new_item)
         session.commit()
         return redirect(url_for('showRecentItems'))
@@ -429,6 +456,7 @@ def newItem():
 @app.route('/catalog/<category_name>/<item_name>/edit',
            methods=['GET', 'POST'])
 def editItem(category_name, item_name):
+
     # Can't access this page unless we're logged in
     if 'username' not in login_session:
         return redirect('/login')
@@ -438,26 +466,41 @@ def editItem(category_name, item_name):
     item = session.query(Item).filter_by(category=this_category).\
         filter_by(name=item_name).one()
 
+    item_owner = item.owner
+    current_user = getUser(login_session['email'])
+
     if request.method == 'GET':
-        return render_template('edit_item.html', categories=all_categories,
-                               category=this_category, item=item,
-                               username=login_session['username'])
+        # Make sure that you can only get to the edit form if you're logged
+        # in as the owner of this item
+        if item_owner == current_user:
+            return render_template('edit_item.html', categories=all_categories,
+                                   category=this_category, item=item,
+                                   username=login_session['username'])
+
+        # If you aren't the owner, you can only see the item's description
+        else:
+            return redirect(url_for('showItem', category_name=category_name,
+                            item_name=item_name))
 
     elif request.method == 'POST':
-        new_name = request.form['name']
-        if new_name:
-            item_name = new_name
-            item.name = new_name
-        new_desc = request.form['description']
-        if new_desc:
-            item.description = new_desc
-        new_cat = request.form['category']
-        if new_cat:
-            category_name = new_cat
-            new_category = session.query(Category).\
-                filter_by(name=category_name).one()
-            item.category = new_category
-        session.commit()
+        # Only make the changes if you are logged in as the owner of this item
+        if item_owner == current_user:
+            new_name = request.form['name']
+            if new_name:
+                item_name = new_name
+                item.name = new_name
+            new_desc = request.form['description']
+            if new_desc:
+                item.description = new_desc
+            new_cat = request.form['category']
+            if new_cat:
+                category_name = new_cat
+                new_category = session.query(Category).\
+                    filter_by(name=category_name).one()
+                item.category = new_category
+            session.commit()
+
+        # Go back to the item's description page
         return redirect(url_for('showItem', category_name=category_name,
                         item_name=item_name))
 
@@ -475,14 +518,30 @@ def deleteItem(category_name, item_name):
     item = session.query(Item).filter_by(category=this_category).\
         filter_by(name=item_name).one()
 
+    item_owner = item.owner
+    current_user = getUser(login_session['email'])
+
     if request.method == 'GET':
-        return render_template('delete_item.html', categories=all_categories,
-                               category=this_category, item=item,
-                               username=login_session['username'])
+        # Make sure that you can only get to the delete form if you're logged
+        # in as the owner of this item
+        if item_owner == current_user:
+            return render_template('delete_item.html',
+                                   categories=all_categories,
+                                   category=this_category, item=item,
+                                   username=login_session['username'])
+
+        # If you aren't the owner, you can only see the item's description
+        else:
+            return redirect(url_for('showItem', category_name=category_name,
+                            item_name=item_name))
 
     elif request.method == 'POST':
-        session.delete(item)
-        session.commit()
+        # Only allow delete if you are logged in as the owner of this item
+        if item_owner == current_user:
+            session.delete(item)
+            session.commit()
+
+        # Go back to the category page that this item was in
         return redirect(url_for('showFullCategory',
                         category_name=category_name))
 
@@ -540,6 +599,9 @@ def apiNewItem():
     category_name = request.args.get('category')
     item_name = request.args.get('name')
 
+    token = auth.username()
+    current_user = getUser(token)
+
     if category_name is None or item_name is None:
         return jsonify({'error': 'Calls to /api/new_item require 2 parameters: \
                         category and name.'})
@@ -554,7 +616,8 @@ def apiNewItem():
     if description is None:
         description = 'no description given'
 
-    new_item = Item(name=item_name, description=description, category=category)
+    new_item = Item(name=item_name, description=description,
+                    category=category, owner=current_user)
     session.add(new_item)
     session.commit()
     return jsonify(new_item.serialize)
@@ -566,6 +629,9 @@ def apiNewItem():
 def apiEditItem():
     category_name = request.args.get('category')
     item_name = request.args.get('name')
+
+    token = auth.username()
+    current_user = getUser(token)
 
     if category_name is None or item_name is None:
         return jsonify({'error': 'Calls to /api/edit_item require \
@@ -582,6 +648,11 @@ def apiEditItem():
     if item is None:
         return jsonify({'error': 'Cannot edit item; category %s has no item \
                         %s.' % (category_name, item_name)})
+
+    # Authorization check: if the owner of the item isn't the person
+    # making the request, don't let them edit
+    if current_user != item.owner:
+        return jsonify({'error': 'Cannot edit item; you are not its owner.'})
 
     new_name = request.args.get('new_name')
     if new_name is not None:
@@ -612,6 +683,9 @@ def apiDeleteItem():
     category_name = request.args.get('category')
     item_name = request.args.get('name')
 
+    token = auth.username()
+    current_user = getUser(token)
+
     if category_name is None or item_name is None:
         return jsonify({'error': 'Calls to /api/delete_item require 2 \
                         parameters: category and name.'})
@@ -627,6 +701,11 @@ def apiDeleteItem():
     if item is None:
         return jsonify({'error': 'Cannot delete item; category %s has no item \
                         %s.' % (category_name, item_name)})
+
+    # Authorization check: if the owner of the item isn't the person
+    # making the request, don't let them edit
+    if current_user != item.owner:
+        return jsonify({'error': 'Cannot delete item; you are not its owner.'})
 
     session.delete(item)
     return jsonify({'success': 'Deleted item %s from category %s.' %

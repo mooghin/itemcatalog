@@ -9,8 +9,8 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-# Create dummy user
-User1 = User(username="Megan", email="mooghin@gmail.com")
+# Create initial user
+User1 = User(username="Megan Elmore", email="mooghin@gmail.com")
 session.add(User1)
 session.commit()
 
@@ -33,13 +33,13 @@ session.commit()
 
 # Create items in each category
 # First category: Camping
-tent = Item(name="tent", category=Camping)
-sleeping_bag = Item(name="sleeping bag", category=Camping)
-sleeping_pad = Item(name="sleeping pad", category=Camping)
-plate = Item(name="plate", category=Camping)
-mug = Item(name="mug", category=Camping)
-spork = Item(name="spork", category=Camping)
-headlamp = Item(name="headlamp", category=Camping)
+tent = Item(owner=User1, name="tent", category=Camping)
+sleeping_bag = Item(owner=User1, name="sleeping bag", category=Camping)
+sleeping_pad = Item(owner=User1, name="sleeping pad", category=Camping)
+plate = Item(owner=User1, name="plate", category=Camping)
+mug = Item(owner=User1, name="mug", category=Camping)
+spork = Item(owner=User1, name="spork", category=Camping)
+headlamp = Item(owner=User1, name="headlamp", category=Camping)
 
 session.add(tent)
 session.add(sleeping_bag)
@@ -51,10 +51,10 @@ session.add(headlamp)
 session.commit()
 
 # Second category: Hiking
-boots = Item(name="hiking boots", category=Hiking)
-socks = Item(name="wool socks", category=Hiking)
-pack = Item(name="daypack", category=Hiking)
-hat = Item(name="sun hat", category=Hiking)
+boots = Item(owner=User1, name="hiking boots", category=Hiking)
+socks = Item(owner=User1, name="wool socks", category=Hiking)
+pack = Item(owner=User1, name="daypack", category=Hiking)
+hat = Item(owner=User1, name="sun hat", category=Hiking)
 
 session.add(boots)
 session.add(socks)
@@ -63,10 +63,10 @@ session.add(hat)
 session.commit()
 
 # Third category: Spinning
-top = Item(name="workout top", category=Spinning)
-tights = Item(name="spin tights", category=Spinning)
-socks = Item(name="cotton socks", category=Spinning)
-shoes = Item(name="spinning shoes", category=Spinning)
+top = Item(owner=User1, name="workout top", category=Spinning)
+tights = Item(owner=User1, name="spin tights", category=Spinning)
+socks = Item(owner=User1, name="cotton socks", category=Spinning)
+shoes = Item(owner=User1, name="spinning shoes", category=Spinning)
 
 session.add(top)
 session.add(tights)
@@ -75,10 +75,10 @@ session.add(shoes)
 session.commit()
 
 # Fourth category: Health
-bottle = Item(name="water bottle", category=Health)
-uv = Item(name="sunscreen", category=Health)
-chapstick = Item(name="Chap-Stick", category=Health)
-bandaids = Item(name="Band-Aids", category=Health)
+bottle = Item(owner=User1, name="water bottle", category=Health)
+uv = Item(owner=User1, name="sunscreen", category=Health)
+chapstick = Item(owner=User1, name="Chap-Stick", category=Health)
+bandaids = Item(owner=User1, name="Band-Aids", category=Health)
 
 session.add(bottle)
 session.add(uv)
